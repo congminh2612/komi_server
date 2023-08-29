@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Blog {
+  id              String        @id @default(cuid()) @db.VarChar(50)
+  name            String        @db.VarChar(250)
+  seotitle        String        @db.VarChar(250)
+  status          Boolean       @db.Bit(1)
+  image           String        @db.VarChar(250)
+  hot             DateTime?     @db.DateTime(0)
+  blogCategory    BlogCategory? @relation(fields: [blogCategory_id], references: [id])
+  description     String        @db.VarChar(500)
+  detail          String        @db.VarChar(250)
+  viewCount       Int?
+  createAt        DateTime      @default(now()) @db.DateTime(0)
+  updateAt        DateTime      @default(now()) @updatedAt @db.DateTime(0)
+  blogCategory_id String?       @db.VarChar(50)
+}
+
+model BlogCategory {
+  id       String   @id @default(cuid()) @db.VarChar(50)
+  name     String   @db.VarChar(50)
+  seoTitle String   @db.VarChar(50)
+  status   Boolean  @default(dbgenerated("b'1'")) @db.Bit(1)
+  parentId Int
+  createAt DateTime @default(now()) @db.DateTime(0)
+  updateAt DateTime @default(now()) @updatedAt @db.DateTime(0)
+  Blog     Blog[]
+}
+
+model Brand {
+  id       Int      @id @default(autoincrement())
+  name     String   @db.VarChar(45)
+  createAt DateTime @default(now()) @db.DateTime(0)
+  updateAt DateTime @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model Category {
+  category_id String   @id @default(cuid()) @db.VarChar(50)
+  name        String   @db.VarChar(50)
+  seoTitle    String   @db.VarChar(50)
+  status      Boolean  @default(dbgenerated("b'1'")) @db.Bit(1)
+  parentId    Int
+  createAt    DateTime @default(now()) @db.DateTime(0)
+  updateAt    DateTime @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model Discounts {
+  id              String            @id @default(cuid()) @db.VarChar(50)
+  name            String            @db.VarChar(50)
+  voucher_start   DateTime?         @db.DateTime(0)
+  voucher_end     DateTime?         @db.DateTime(0)
+  createAt        DateTime          @default(now()) @db.DateTime(0)
+  updateAt        DateTime          @default(now()) @updatedAt @db.DateTime(0)
+  discountProduct DiscountProduct[]
+}
+
+model DiscountProduct {
+  id          String    @id @default(cuid()) @db.VarChar(50)
+  product     Product?  @relation(fields: [product_id], references: [id])
+  product_id  String?   @db.VarChar(50)
+  discount    Discounts @relation(fields: [discount_id], references: [id])
+  discount_id String    @db.VarChar(50)
+  createAt    DateTime  @default(now()) @db.DateTime(0)
+  updateAt    DateTime  @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model Vouchers {
+  id            String        @id @default(cuid()) @db.VarChar(50)
+  name          String        @db.VarChar(50)
+  voucher_start DateTime?     @db.DateTime(0)
+  voucher_end   DateTime?     @db.DateTime(0)
+  voucherUser   VoucherUser[]
+  createAt      DateTime      @default(now()) @db.DateTime(0)
+  updateAt      DateTime      @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model VoucherUser {
+  id         String   @id @default(cuid()) @db.VarChar(50)
+  voucher    Vouchers @relation(fields: [voucher_id], references: [id])
+  user       Users    @relation(fields: [user_id], references: [id])
+  user_id    String   @db.VarChar(50)
+  quantity   Int
+  voucher_id String   @db.VarChar(50)
+  createAt   DateTime @default(now()) @db.DateTime(0)
+  updateAt   DateTime @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model Orders {
+  id              String        @id @default(cuid()) @db.VarChar(50)
+  orderDate       DateTime      @db.DateTime(0)
+  status          Boolean       @db.Bit(1)
+  deliveryAddress String        @db.VarChar(100)
+  delivered       Boolean       @db.Bit(1)
+  deliveryDate    DateTime?     @db.DateTime(0)
+  user            Users?        @relation(fields: [user_id], references: [id])
+  user_id         String?       @db.VarChar(50)
+  createAt        DateTime      @default(now()) @db.DateTime(0)
+  updateAt        DateTime      @default(now()) @updatedAt @db.DateTime(0)
+  orderDetail     OrderDetail[]
+}
+
+model OrderDetail {
+  id          String   @id @default(cuid()) @db.VarChar(50)
+  order_id    String   @db.VarChar(50)
+  product_id  String   @db.VarChar(45)
+  productName String   @db.VarChar(45)
+  price       Decimal  @db.Decimal(18, 0)
+  quantity    Int
+  order       Orders?  @relation(fields: [order_id], references: [id])
+  createAt    DateTime @default(now()) @db.DateTime(0)
+  updateAt    DateTime @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model Product {
+  id              String            @id @default(cuid()) @db.VarChar(50)
+  name            String            @db.VarChar(250)
+  seotitle        String            @db.VarChar(250)
+  status          Boolean           @db.Bit(1)
+  mainImage       String            @db.VarChar(250)
+  listImage       String            @db.VarChar(250)
+  price           Decimal           @default(0) @db.Decimal(18, 0)
+  promotionPrice  Decimal           @default(0) @db.Decimal(18, 0)
+  vat             Boolean           @default(dbgenerated("b'0'")) @db.Bit(1)
+  quantity        Int               @default(0)
+  warranty        Int
+  hot             DateTime?         @db.DateTime(0)
+  description     String            @db.VarChar(500)
+  detail          String            @db.VarChar(250)
+  viewCount       Int?
+  category_id     String?           @db.VarChar(50)
+  brand_id        String?           @db.VarChar(50)
+  supplier_id     String?           @db.VarChar(50)
+  createAt        DateTime          @default(now()) @db.DateTime(0)
+  updateAt        DateTime          @default(now()) @updatedAt @db.DateTime(0)
+  discountProduct DiscountProduct[]
+}
+
+model Users {
+  id          String        @id @default(cuid()) @db.VarChar(50)
+  name        String        @db.VarChar(45)
+  email       String        @unique @db.VarChar(45)
+  password    String        @unique @db.VarChar(250)
+  phone       String        @unique @db.VarChar(45)
+  address     String        @db.VarChar(250)
+  voucherUser VoucherUser[]
+  orders      Orders[]
+  role        String        @default("user") @db.VarChar(50)
+  roleName    Role          @relation(fields: [role], references: [roleName])
+  createAt    DateTime      @default(now()) @db.DateTime(0)
+  updateAt    DateTime      @default(now()) @updatedAt @db.DateTime(0)
+}
+
+model Role {
+  id       String   @id @default(cuid()) @db.VarChar(50)
+  roleName String   @unique @db.VarChar(50)
+  createAt DateTime @default(now()) @db.DateTime(0)
+  updateAt DateTime @default(now()) @updatedAt @db.DateTime(0)
+  user     Users[]
+}
